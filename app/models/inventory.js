@@ -9,39 +9,39 @@ var inventory = mongoose.Schema({
     },
     productId: {
         type: 'String',
-        // required: true
+        required: true
     },
     brandName: {
         type: 'String',
-        // required: true
+        required: true
     },
     imgUrl: {
         type: 'String',
-        // required: true
+        required: true
     },
     mrp: {
         type: 'Number',
-        // required: true
+        required: true
     },
     vendorDiscount: {
         type: 'Number',
-        // required: true
+        required: true
     },
     appSellingDiscount: {
         type: 'Number',
-        // required: true
+        required: true
     },
     titleofModel: {
         type: 'String',
-        // required: true
+        required: true
     },
     productQty: {
         type: 'Number',
-        // required: true
+        required: true
     },
     date: {
         type: 'Date',
-        // required: true,
+        required: true,
         default : Date.now
     }
 });

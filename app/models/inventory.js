@@ -27,11 +27,11 @@ var inventory = mongoose.Schema({
         type: 'Number',
         required: true
     },
-    appSellingDiscount: {
+    approxSellingDiscount: {
         type: 'Number',
         required: true
     },
-    titleofModel: {
+    titleOrModel: {
         type: 'String',
         required: true
     },

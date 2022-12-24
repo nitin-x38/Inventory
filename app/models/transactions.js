@@ -23,7 +23,7 @@ var transactions = mongoose.Schema({
         type: 'String',
         required: true
     },
-    no: {
+    customerMobile: {
         type: 'String',
         required: true
     },

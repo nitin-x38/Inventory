@@ -10,9 +10,9 @@ var controllers = {
             let lotName = req.body.lotName;
             let vendorName = req.body.vendorName;
             let lotDetails = req.body.lotDetails;
-            let lotBrand = req.body.lotBrand;
+            let lotBrands = req.body.lotBrands;
             let lotPrice = req.body.lotPrice;
-            let appQty = req.body.appQty;
+            let approxQty = req.body.approxQty;
             let lotData = req.body;
 
             if (lotName == null || lotName == undefined || lotName.length == 0) {
@@ -27,7 +27,7 @@ var controllers = {
                 throw new Error("Lot Details must be filled out.");
             }
 
-            if (lotBrand == null || lotBrand == undefined && !Array.isArray(lotBrand)) {
+            if (lotBrands == null || lotBrands == undefined && !Array.isArray(lotBrands)) {
                 throw new Error("Lot Brand must be filled out.");
             }
 
@@ -35,7 +35,7 @@ var controllers = {
                 throw new Error("Lot Price must be filled out.");
             }
 
-            if (appQty == null || appQty == undefined || isNaN(appQty)) {
+            if (approxQty == null || approxQty == undefined || isNaN(approxQty)) {
                 throw new Error("Appoximate Quantity must be filled out.");
             }
             let data = await SERVICES.addlot(lotData);
@@ -60,18 +60,18 @@ var controllers = {
     addInventory: async function (req, res) {
 
         try {
-            let productId = req.body.productId;
+            let lotId = req.body.lotId;
             let brandName = req.body.brandName;
             let imgUrl = req.body.imgUrl;
             let mrp = req.body.mrp;
             let vendorDiscount = req.body.vendorDiscount;
-            let appSellingDiscount = req.body.appSellingDiscount;
-            let titleofModel = req.body.titleofModel;
+            let approxSellingDiscount = req.body.approxSellingDiscount;
+            let titleOrModel = req.body.titleOrModel;
             let productQty = req.body.productQty;
             let lotData = req.body;
 
-            if (productId == null || productId == undefined || productId.length == 0) {
-                throw new Error("ProductId must be filled out.");
+            if (lotId == null || lotId == undefined || lotId.length == 0) {
+                throw new Error("LotId must be filled out.");
             }
 
             if (brandName == null || brandName == undefined || brandName.length == 0) {
@@ -90,17 +90,24 @@ var controllers = {
                 throw new Error("Vendor Discount must be filled out.");
             }
 
-            if (appSellingDiscount == null || appSellingDiscount == undefined || isNaN(appSellingDiscount)) {
+            if (approxSellingDiscount == null || approxSellingDiscount == undefined || isNaN(approxSellingDiscount)) {
                 throw new Error("Approximate Selling Discount must be filled out.");
             }
 
-            if (titleofModel == null || titleofModel == undefined || titleofModel.length == 0) {
+            if (titleOrModel == null || titleOrModel == undefined || titleOrModel.length == 0) {
                 throw new Error("Title of Model must be filled out.");
             }
 
             if (productQty == null || productQty == undefined || isNaN(productQty)) {
                 throw new Error("Product Quantity must be filled out.");
             }
+
+            let findQuery = { lotId: lotId };
+            let fdata = await SERVICES.getLots(findQuery, { lotId: 1 }, {}, 0, 0)
+            if (fdata.length < 0) {
+                throw new Error("The lotId is not exist.")
+            }
+
             let data = await SERVICES.addinventory(lotData);
             let response = {
                 success: 1,
@@ -122,10 +129,10 @@ var controllers = {
 
     search: async function (req, res) {
 
-        let titleofModel = req.body.titleofModel;
+        let titleOrModel = req.body.titleOrModel;
         let brandName = req.body.brandName;
         try {
-            let findQuery = { $or: [{ titleofModel: titleofModel }, { brandName: brandName }] }
+            let findQuery = { $or: [{ titleOrModel: titleOrModel }, { brandName: brandName }] };
             let sdata = await SERVICES.search(findQuery, { _id: 1, productId: 1, lotId: 1, brandName: 1, imgUrl: 1, mrp: 1, vendorDiscount: 1, appSellingDiscount: 1, titleofModel: 1, productQty: 1 }, {}, 0, 100);
 
             let response = {
@@ -155,7 +162,7 @@ var controllers = {
             let qty = req.body.qty;
             let sellingDiscount = req.body.sellingDiscount;
             let shopName = req.body.shopName;
-            let no = req.body.no;
+            let customerMobile = req.body.customerMobile;
             let amount = req.body.amount;
             let lotData = req.body;
 
@@ -179,17 +186,37 @@ var controllers = {
                 throw new Error("Shop Name must be filled out.");
             }
 
-            if (no == null || no == undefined || isNaN(no)) {
+            if (customerMobile == null || customerMobile == undefined || isNaN(customerMobile)) {
                 throw new Error("Number must be filled out.");
             }
 
             if (amount == null || amount == undefined || isNaN(amount)) {
                 throw new Error("Amount must be filled out.");
             }
+
+            //---------------- Quantity Decrement-----------------------
+
+            let findQuery = { productId: productId };
+            let qdata = await SERVICES.getInventory(findQuery, {}, {}, 0, 1)
+            if (qdata.length == 0) {
+                throw new Error("There is no Quantity available in Inventory");
+            }
+
+            if (qdata[0].productQty <= qty) {
+                throw new Error("Qyantity not Valid");
+            }
+            qty = 0-qty;
+            let filter = { productId: productId };
+            let updateData = { $inc: { productQty: qty } };
+            let udata = await SERVICES.updateInventory(filter, updateData);
+
+            // ---------------------------------------------------------
+
             let data = await SERVICES.addtransaction(lotData);
             let response = {
                 success: 1,
-                data: data
+                data: data,
+                update: udata
             }
             return res.send(response);
 
@@ -205,7 +232,7 @@ var controllers = {
         }
     },
 
-    getallLots: async function (req, res) {
+    getAllLots: async function (req, res) {
 
         try {
             let findQuery = {}
@@ -230,7 +257,7 @@ var controllers = {
         }
     },
 
-    getallTransaction: async function (req, res) {
+    getAllTransaction: async function (req, res) {
 
         try {
             let findQuery = {}
@@ -255,10 +282,36 @@ var controllers = {
         }
     },
 
-    getallInventory: async function (req, res) {
+    getAllInventory: async function (req, res) {
 
         try {
             let findQuery = {}
+            let sdata = await SERVICES.getInventory(findQuery, {}, {}, 0, 100);
+
+            let response = {
+                success: 1,
+                data: sdata
+            }
+
+            return res.send(response);
+
+        } catch (e) {
+            console.error(e);
+
+            let response = {
+                success: 0,
+                message: e.message
+            }
+
+            return res.send(response);
+        }
+    },
+
+    getAllInventoryOfLots: async function (req, res) {
+        
+            let lotId = req.body.lotId;
+        try {
+            let findQuery = {lotId:lotId}
             let sdata = await SERVICES.getInventory(findQuery, {}, {}, 0, 100);
 
             let response = {

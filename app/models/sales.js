@@ -5,8 +5,7 @@ var mongoose = require('mongoose');
 var sales = mongoose.Schema({
     lotId: {
         type: 'String',
-        required: true,
-        unique: true
+        required: true
     },
     lotName: {
         type: 'String',
@@ -20,7 +19,7 @@ var sales = mongoose.Schema({
         type: 'String',
         required: true
     },
-    lotBrand: {
+    lotBrands: {
         type: "Mixed",
         required: true
     },
@@ -28,7 +27,7 @@ var sales = mongoose.Schema({
         type: 'Number',
         required: true
     },
-    appQty: {
+    approxQty: {
         type: 'Number',
         required: true
     },

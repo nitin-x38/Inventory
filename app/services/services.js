@@ -26,8 +26,8 @@ var saleServices = {
     addinventory: async function(lotData) {
         try {
 
-            let lotId = await UUID.v4();
-            lotData.lotId = lotId;
+            let productId = await UUID.v4();
+            lotData.productId = productId;
             let lotObj = new INVENTORY_MODEL(lotData);
             let newLot = await lotObj.save();
             return newLot;
@@ -133,6 +133,18 @@ var saleServices = {
 
         return data;
 
+    },
+    
+    updateInventory: async function(filter,updateData) {
+        try{
+            console.log(filter,updateData);
+            var udata = await INVENTORY_MODEL.updateOne(filter, updateData,{multi:false});
+            console.log(updateData);
+            return udata;
+        }catch(e){
+            console.log(e);
+            return 0;
+        }
     },
 };
 

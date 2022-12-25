@@ -2,34 +2,21 @@
 
 var mongoose = require('mongoose');
 
-var sales = mongoose.Schema({
-    lotId: {
+var users = mongoose.Schema({
+    UserId: {
         type: 'String',
         required: true,
-        unique: true
     },
-    lotName: {
+    mobileNo: {
         type: 'String',
         required: true
     },
-    vendorName: {
+    emailId: {
         type: 'String',
         required: true
     },
-    lotDetails: {
+    password: {
         type: 'String',
-        required: true
-    },
-    lotBrands: {
-        type: "Mixed",
-        required: true
-    },
-    lotPrice: {
-        type: 'Number',
-        required: true
-    },
-    approxQty: {
-        type: 'Number',
         required: true
     },
     date: {
@@ -46,4 +33,4 @@ var connection = mongoose.createConnection('mongodb://localhost:27017/sales', {
     useFindAndModify: false
 });
 
-module.exports = connection.model('sales', sales, 'sales');
+module.exports = connection.model('users', users, 'users');

@@ -1,12 +1,29 @@
 'use strict';
 
 const SERVICES = require("../services/services");
+const AUTH_SERVICES = require("../services/authServices")
+
 
 var controllers = {
 
     addLot: async function (req, res) {
 
         try {
+
+            let loginToken = req.headers["login-token"];
+
+            if (loginToken == null || loginToken == undefined || loginToken.length <= 4) {
+                throw new Error("Login Token failed");
+            }
+
+            let loginData = await AUTH_SERVICES.verifyUserLoginToken(loginToken, "NA");
+
+            if (loginData.success == 1 && loginData.userId.length > 4) {
+
+            } else {
+                throw new Error("User authentication failed");
+            }
+
             let lotName = req.body.lotName;
             let vendorName = req.body.vendorName;
             let lotDetails = req.body.lotDetails;
@@ -60,6 +77,21 @@ var controllers = {
     addInventory: async function (req, res) {
 
         try {
+
+            let loginToken = req.headers["login-token"];
+
+            if (loginToken == null || loginToken == undefined || loginToken.length <= 4) {
+                throw new Error("Login Token failed");
+            }
+
+            let loginData = await AUTH_SERVICES.verifyUserLoginToken(loginToken, "NA");
+
+            if (loginData.success == 1 && loginData.userId.length > 4) {
+
+            } else {
+                throw new Error("User authentication failed");
+            }
+
             let lotId = req.body.lotId;
             let brandName = req.body.brandName;
             let imgUrl = req.body.imgUrl;
@@ -68,7 +100,7 @@ var controllers = {
             let approxSellingDiscount = req.body.approxSellingDiscount;
             let titleOrModel = req.body.titleOrModel;
             let productQty = req.body.productQty;
-            let lotData = req.body;
+            let inventoryData = req.body;
 
             if (lotId == null || lotId == undefined || lotId.length == 0) {
                 throw new Error("LotId must be filled out.");
@@ -108,7 +140,7 @@ var controllers = {
                 throw new Error("The lotId is not exist.")
             }
 
-            let data = await SERVICES.addinventory(lotData);
+            let data = await SERVICES.addinventory(inventoryData);
             let response = {
                 success: 1,
                 data: data
@@ -129,9 +161,25 @@ var controllers = {
 
     search: async function (req, res) {
 
-        let titleOrModel = req.body.titleOrModel;
-        let brandName = req.body.brandName;
+
         try {
+
+            let loginToken = req.headers["login-token"];
+
+            if (loginToken == null || loginToken == undefined || loginToken.length <= 4) {
+                throw new Error("Login Token failed");
+            }
+
+            let loginData = await AUTH_SERVICES.verifyUserLoginToken(loginToken, "NA");
+
+            if (loginData.success == 1 && loginData.userId.length > 4) {
+
+            } else {
+                throw new Error("User authentication failed");
+            }
+
+            let titleOrModel = req.body.titleOrModel;
+            let brandName = req.body.brandName;
             let findQuery = { $or: [{ titleOrModel: titleOrModel }, { brandName: brandName }] };
             let sdata = await SERVICES.search(findQuery, { _id: 1, productId: 1, lotId: 1, brandName: 1, imgUrl: 1, mrp: 1, vendorDiscount: 1, appSellingDiscount: 1, titleofModel: 1, productQty: 1 }, {}, 0, 100);
 
@@ -157,6 +205,21 @@ var controllers = {
     addTransaction: async function (req, res) {
 
         try {
+
+            let loginToken = req.headers["login-token"];
+
+            if (loginToken == null || loginToken == undefined || loginToken.length <= 4) {
+                throw new Error("Login Token failed");
+            }
+
+            let loginData = await AUTH_SERVICES.verifyUserLoginToken(loginToken, "NA");
+
+            if (loginData.success == 1 && loginData.userId.length > 4) {
+
+            } else {
+                throw new Error("User authentication failed");
+            }
+
             let productId = req.body.productId;
             let title = req.body.title;
             let qty = req.body.qty;
@@ -164,7 +227,7 @@ var controllers = {
             let shopName = req.body.shopName;
             let customerMobile = req.body.customerMobile;
             let amount = req.body.amount;
-            let lotData = req.body;
+            let transactionData = req.body;
 
             if (productId == null || productId == undefined || productId.length == 0) {
                 throw new Error("ProductId must be filled out.");
@@ -205,14 +268,17 @@ var controllers = {
             if (qdata[0].productQty <= qty) {
                 throw new Error("Qyantity not Valid");
             }
-            qty = 0-qty;
+
+            // transactionData = qdata[0].productId.lotId;
+
+            qty = 0 - qty;
             let filter = { productId: productId };
             let updateData = { $inc: { productQty: qty } };
             let udata = await SERVICES.updateInventory(filter, updateData);
 
             // ---------------------------------------------------------
 
-            let data = await SERVICES.addtransaction(lotData);
+            let data = await SERVICES.addtransaction(transactionData);
             let response = {
                 success: 1,
                 data: data,
@@ -235,6 +301,21 @@ var controllers = {
     getAllLots: async function (req, res) {
 
         try {
+
+            let loginToken = req.headers["login-token"];
+
+            if (loginToken == null || loginToken == undefined || loginToken.length <= 4) {
+                throw new Error("Login Token failed");
+            }
+
+            let loginData = await AUTH_SERVICES.verifyUserLoginToken(loginToken, "NA");
+
+            if (loginData.success == 1 && loginData.userId.length > 4) {
+
+            } else {
+                throw new Error("User authentication failed");
+            }
+
             let findQuery = {}
             let sdata = await SERVICES.getLots(findQuery, {}, {}, 0, 100);
 
@@ -260,6 +341,21 @@ var controllers = {
     getAllTransaction: async function (req, res) {
 
         try {
+
+            let loginToken = req.headers["login-token"];
+
+            if (loginToken == null || loginToken == undefined || loginToken.length <= 4) {
+                throw new Error("Login Token failed");
+            }
+
+            let loginData = await AUTH_SERVICES.verifyUserLoginToken(loginToken, "NA");
+
+            if (loginData.success == 1 && loginData.userId.length > 4) {
+
+            } else {
+                throw new Error("User authentication failed");
+            }
+
             let findQuery = {}
             let sdata = await SERVICES.getTransaction(findQuery, {}, {}, 0, 100);
 
@@ -285,7 +381,65 @@ var controllers = {
     getAllInventory: async function (req, res) {
 
         try {
+
+            let loginToken = req.headers["login-token"];
+
+            if (loginToken == null || loginToken == undefined || loginToken.length <= 4) {
+                throw new Error("Login Token failed");
+            }
+
+            let loginData = await AUTH_SERVICES.verifyUserLoginToken(loginToken, "NA");
+
+            if (loginData.success == 1 && loginData.userId.length > 4) {
+
+            } else {
+                throw new Error("User authentication failed");
+            }
+
             let findQuery = {}
+            let sdata = await SERVICES.getInventory(findQuery, {}, {}, 0, 1);
+
+
+            let response = {
+                success: 1,
+                data: sdata,
+
+            }
+
+            return res.send(response);
+
+        } catch (e) {
+            console.error(e);
+
+            let response = {
+                success: 0,
+                message: e.message
+            }
+
+            return res.send(response);
+        }
+    },
+
+    getAllInventoryOfLots: async function (req, res) {
+
+        try {
+
+            let loginToken = req.headers["login-token"];
+
+            if (loginToken == null || loginToken == undefined || loginToken.length <= 4) {
+                throw new Error("Login Token failed");
+            }
+
+            let loginData = await AUTH_SERVICES.verifyUserLoginToken(loginToken, "NA");
+
+            if (loginData.success == 1 && loginData.userId.length > 4) {
+
+            } else {
+                throw new Error("User authentication failed");
+            }
+
+            let lotId = req.body.lotId;
+            let findQuery = { lotId: lotId }
             let sdata = await SERVICES.getInventory(findQuery, {}, {}, 0, 100);
 
             let response = {
@@ -307,16 +461,84 @@ var controllers = {
         }
     },
 
-    getAllInventoryOfLots: async function (req, res) {
-        
-            let lotId = req.body.lotId;
+    getUserLogin: async function (req, res) {
+
+        let mobileNo = req.body.mobileNo;
+        let password = req.body.password;
+
+
+
         try {
-            let findQuery = {lotId:lotId}
-            let sdata = await SERVICES.getInventory(findQuery, {}, {}, 0, 100);
+            let findQuery = { mobileNo: mobileNo, password: password }
+            let data = await SERVICES.getUserLogin(findQuery, {}, {}, 0, 1);
+            if (data.length == 0) {
+                throw new Error("Invalid credential.");
+            }
+
+            let user = data[0];
+            let userId = user.userId;
+
+            let token = await AUTH_SERVICES.generateUserLoginToken(userId, "NA");
 
             let response = {
                 success: 1,
-                data: sdata
+                data: data,
+                userId: userId,
+                token: token
+            }
+
+            return res.send(response);
+
+        } catch (e) {
+            console.error(e);
+
+            let response = {
+                success: 0,
+                message: e.message
+            }
+
+            return res.send(response);
+        }
+    },
+
+    getAllTransactionOfLots: async function (req, res) {
+
+        try {
+
+            let loginToken = req.headers["login-token"];
+
+            if (loginToken == null || loginToken == undefined || loginToken.length <= 4) {
+                throw new Error("Login Token failed");
+            }
+
+            let loginData = await AUTH_SERVICES.verifyUserLoginToken(loginToken, "NA");
+
+            if (loginData.success == 1 && loginData.userId.length > 4) {
+
+            } else {
+                throw new Error("User authentication failed");
+            }
+
+            let productId = req.body.productId;
+            let findQuery = { productId: productId }
+            let sdata = await SERVICES.getTransaction(findQuery, {}, {}, 0, 100);
+
+            let transCollection = 0;
+            let transQty = 0;
+
+            for (i = 0; i < sdata.length; i++) {
+                let temp = sdata[i];
+
+                transCollection = transCollection + temp.amount;
+                transQty = transQty + temp.qty
+            }
+            let response = {
+                success: 1,
+                data: sdata,
+                summary: {
+                    transCollection: transCollection,
+                    transQty: transQty
+                }
             }
 
             return res.send(response);

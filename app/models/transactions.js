@@ -3,6 +3,10 @@
 var mongoose = require('mongoose');
 
 var transactions = mongoose.Schema({
+    lotId: {
+        type: 'String',
+        required: true
+    },
     productId: {
         type: 'String',
         required: true

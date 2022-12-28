@@ -4,8 +4,7 @@ var mongoose = require('mongoose');
 
 var transactions = mongoose.Schema({
     lotId: {
-        type: 'String',
-        required: true
+        type: 'String'
     },
     productId: {
         type: 'String',

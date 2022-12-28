@@ -35,9 +35,12 @@ var inventory = mongoose.Schema({
         type: 'String',
         required: true
     },
-    productQty: {
+    initialQty: {
         type: 'Number',
         required: true
+    },
+    currentQty: {
+        type: 'Number',
     },
     date: {
         type: 'Date',

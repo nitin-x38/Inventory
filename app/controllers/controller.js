@@ -99,7 +99,8 @@ var controllers = {
             let vendorDiscount = req.body.vendorDiscount;
             let approxSellingDiscount = req.body.approxSellingDiscount;
             let titleOrModel = req.body.titleOrModel;
-            let productQty = req.body.productQty;
+            let initialQty = req.body.initialQty;
+            let currentQty = req.body.currentQty;
             let inventoryData = req.body;
 
             if (lotId == null || lotId == undefined || lotId.length == 0) {
@@ -130,8 +131,12 @@ var controllers = {
                 throw new Error("Title of Model must be filled out.");
             }
 
-            if (productQty == null || productQty == undefined || isNaN(productQty)) {
-                throw new Error("Product Quantity must be filled out.");
+            if (initialQty == null || initialQty == undefined || isNaN(initialQty)) {
+                throw new Error("Initial Quantity must be filled out.");
+            }
+
+            if (currentQty == null || currentQty == undefined || isNaN(currentQty)) {
+                throw new Error("Current Quantity must be filled out.");
             }
 
             let findQuery = { lotId: lotId };
@@ -227,6 +232,7 @@ var controllers = {
             let shopName = req.body.shopName;
             let customerMobile = req.body.customerMobile;
             let amount = req.body.amount;
+            let LotId = req.body.lotId;
             let transactionData = req.body;
 
             if (productId == null || productId == undefined || productId.length == 0) {
@@ -265,15 +271,13 @@ var controllers = {
                 throw new Error("There is no Quantity available in Inventory");
             }
 
-            if (qdata[0].productQty <= qty) {
+            if (qdata[0].currentQty <= qty) {
                 throw new Error("Qyantity not Valid");
             }
-
-            // transactionData = qdata[0].productId.lotId;
-
+            let lotId = qdata[0].lotId;
             qty = 0 - qty;
             let filter = { productId: productId };
-            let updateData = { $inc: { productQty: qty } };
+            let updateData = { $inc: { currentQty: qty } };
             let udata = await SERVICES.updateInventory(filter, updateData);
 
             // ---------------------------------------------------------
@@ -282,7 +286,8 @@ var controllers = {
             let response = {
                 success: 1,
                 data: data,
-                update: udata
+                update: udata,
+                lotId: lotId
             }
             return res.send(response);
 
@@ -521,12 +526,12 @@ var controllers = {
 
             let productId = req.body.productId;
             let findQuery = { productId: productId }
-            let sdata = await SERVICES.getTransaction(findQuery, {}, {}, 0, 100);
+            let sdata = await SERVICES.getTransaction(findQuery, {}, {}, 0, );
 
             let transCollection = 0;
             let transQty = 0;
 
-            for (i = 0; i < sdata.length; i++) {
+            for (let i = 0; i < sdata.length; i++) {
                 let temp = sdata[i];
 
                 transCollection = transCollection + temp.amount;

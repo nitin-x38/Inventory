@@ -100,7 +100,7 @@ var controllers = {
             let approxSellingDiscount = req.body.approxSellingDiscount;
             let titleOrModel = req.body.titleOrModel;
             let initialQty = req.body.initialQty;
-            let currentQty = req.body.currentQty;
+            //let currentQty = req.body.currentQty;
             let inventoryData = req.body;
 
             if (lotId == null || lotId == undefined || lotId.length == 0) {
@@ -135,15 +135,13 @@ var controllers = {
                 throw new Error("Initial Quantity must be filled out.");
             }
 
-            if (currentQty == null || currentQty == undefined || isNaN(currentQty)) {
-                throw new Error("Current Quantity must be filled out.");
-            }
-
             let findQuery = { lotId: lotId };
             let fdata = await SERVICES.getLots(findQuery, { lotId: 1 }, {}, 0, 0)
             if (fdata.length < 0) {
                 throw new Error("The lotId is not exist.")
             }
+
+            inventoryData.currentQty = initialQty;
 
             let data = await SERVICES.addinventory(inventoryData);
             let response = {
@@ -232,7 +230,6 @@ var controllers = {
             let shopName = req.body.shopName;
             let customerMobile = req.body.customerMobile;
             let amount = req.body.amount;
-            let LotId = req.body.lotId;
             let transactionData = req.body;
 
             if (productId == null || productId == undefined || productId.length == 0) {
@@ -271,7 +268,7 @@ var controllers = {
                 throw new Error("There is no Quantity available in Inventory");
             }
 
-            if (qdata[0].currentQty <= qty) {
+            if (qdata[0].currentQty < qty) {
                 throw new Error("Qyantity not Valid");
             }
             let lotId = qdata[0].lotId;
@@ -281,13 +278,12 @@ var controllers = {
             let udata = await SERVICES.updateInventory(filter, updateData);
 
             // ---------------------------------------------------------
-
+            transactionData.lotId=lotId;
             let data = await SERVICES.addtransaction(transactionData);
             let response = {
                 success: 1,
                 data: data,
-                update: udata,
-                lotId: lotId
+                update: udata
             }
             return res.send(response);
 
@@ -322,7 +318,7 @@ var controllers = {
             }
 
             let findQuery = {}
-            let sdata = await SERVICES.getLots(findQuery, {}, {}, 0, 100);
+            let sdata = await SERVICES.getLots(findQuery, {}, {}, 0);
 
             let response = {
                 success: 1,
@@ -362,7 +358,7 @@ var controllers = {
             }
 
             let findQuery = {}
-            let sdata = await SERVICES.getTransaction(findQuery, {}, {}, 0, 100);
+            let sdata = await SERVICES.getTransaction(findQuery, {}, {}, 0);
 
             let response = {
                 success: 1,
@@ -524,8 +520,8 @@ var controllers = {
                 throw new Error("User authentication failed");
             }
 
-            let productId = req.body.productId;
-            let findQuery = { productId: productId }
+            let lotId = req.body.lotId;
+            let findQuery = { lotId: lotId }
             let sdata = await SERVICES.getTransaction(findQuery, {}, {}, 0, );
 
             let transCollection = 0;
@@ -557,6 +553,37 @@ var controllers = {
             }
 
             return res.send(response);
+        }
+    },
+
+    testAggregate: async function (req,res) {
+        try {
+            let aggPipeline = [
+                {
+                    '$group': {
+                        '_id': '$lotId',
+                        'productCount': {
+                            '$sum': 1
+                        },
+                        "products":{
+                            "$push":"$productId"
+                        },
+                        "totalAmount":{
+                            "$sum":"$amount"
+                        },
+                        "totalQty":{
+                            "$sum":"$qty"
+                        }
+                    }
+                }
+            ];
+
+            let data=await SERVICES.getUserAggregate(aggPipeline);
+
+            return res.send(data);
+
+        } catch (e) {
+            return res.send(e);
         }
     },
 };

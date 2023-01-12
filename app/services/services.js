@@ -165,6 +165,22 @@ var saleServices = {
             return 0;
         }
     },
+
+    getUserAggregate: async function(aggPipeline) {
+
+        var data = [];
+        try {
+
+            data = await TRANSACTIONS_MODEL
+                .aggregate(aggPipeline)
+                .read("secondaryPreferred")
+        } catch (error) {
+            console.log(error);
+        }
+
+        return data;
+
+    },
 };
 
 module.exports = saleServices;

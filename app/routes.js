@@ -14,5 +14,6 @@ module.exports = function (app) {
     app.route('/sale/getallInventoryofLots').post(Controller.getAllInventoryOfLots);
     app.route('/sale/getAllTransactionOfLots').post(Controller.getAllTransactionOfLots);
     app.route('/sale/getUserLogin').post(Controller.getUserLogin);
+    app.route('/sale/testaggregate').post(Controller.testAggregate);
 
 }

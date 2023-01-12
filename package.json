@@ -22,6 +22,7 @@
     "cookie-signature": "^1.0.6",
     "core-util-is": "^1.0.3",
     "cors": "^2.8.5",
+    "create-react-app": "^5.0.1",
     "debug": "^2.6.9",
     "denque": "^1.5.1",
     "depd": "^2.0.0",
